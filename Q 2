@@ -1,0 +1,43 @@
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+from google.colab import files
+
+print("Upload your crop field image:")
+uploaded = files.upload()
+
+file_name = next(iter(uploaded)) 
+
+
+img = cv.imread(file_name, cv.IMREAD_GRAYSCALE)
+
+img_contrast = cv.convertScaleAbs(img, alpha=2.0, beta=0)
+
+
+edges = cv.Canny(img_contrast, 550, 690)
+
+
+y_coords, x_coords = np.where(edges != 0)
+
+
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+
+# Plot Original
+ax1.imshow(img, cmap='gray')
+ax1.set_title("Original Image")
+ax1.axis('off')
+
+# Plot Edges
+ax2.imshow(edges, cmap='gray')
+ax2.set_title("Canny Edge Detection")
+ax2.axis('off')
+
+# Plot Scatter (using a teal color to differentiate from your friend's blue)
+ax3.scatter(x_coords, y_coords, s=2, color='teal', alpha=0.7)
+ax3.invert_yaxis()
+ax3.set_title("Edge Points Scatter Plot")
+ax3.set_xlabel("X (pixels)")
+ax3.set_ylabel("Y (pixels)")
+
+plt.tight_layout()
+plt.show()
