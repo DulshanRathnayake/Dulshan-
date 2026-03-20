@@ -1,0 +1,27 @@
+# Question 3: Least Squares Fit using NumPy
+
+
+coefficients = np.polyfit(x_coords, y_coords, 1)
+ls_slope = coefficients[0]
+ls_intercept = coefficients[1]
+
+x_line_range = np.array([np.min(x_coords), np.max(x_coords)])
+y_line_ls = ls_slope * x_line_range + ls_intercept
+
+plt.figure(figsize=(7, 6)) 
+plt.scatter(x_coords, y_coords, s=2, color='teal', alpha=0.5, label='Edge Points')
+
+plt.plot(x_line_range, y_line_ls, color='darkorange', linewidth=2.5, label='NumPy LS Fit')
+
+plt.title("Standard Least-Squares Line Fitting")
+plt.xlabel("X (pixels)")
+plt.ylabel("Y (pixels)")
+plt.legend()
+plt.gca().invert_yaxis() # Keep image coordinate orientation
+plt.show()
+
+ls_angle_rad = np.arctan(ls_slope)
+ls_angle_deg = np.degrees(ls_angle_rad)
+
+print(f"Calculated Least Squares Slope: {ls_slope:.4f}")
+print(f"Estimated Crop Field Angle: {ls_angle_deg:.2f} degrees")
