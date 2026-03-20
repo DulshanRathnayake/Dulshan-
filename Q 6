@@ -1,0 +1,50 @@
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+from google.colab import files
+
+print("Upload your crop field image:")
+uploaded = files.upload()
+file_name = next(iter(uploaded)) 
+
+img = cv.imread(file_name, cv.IMREAD_GRAYSCALE)
+img_contrast = cv.convertScaleAbs(img, alpha=2.0, beta=0)
+edges = cv.Canny(img_contrast, 550, 690)
+
+# Extract coordinates
+y_coords, x_coords = np.where(edges != 0)
+
+# --- QUESTION 6: TOTAL LEAST SQUARES (SVD) ---
+
+# 1. Stack and mean-center the data
+coords_matrix = np.vstack((x_coords, y_coords)).T
+data_mean = np.mean(coords_matrix, axis=0)
+centered_matrix = coords_matrix - data_mean
+
+# 2. Perform Singular Value Decomposition (SVD)
+U, S, Vt = np.linalg.svd(centered_matrix)
+
+# 3. Get the principal direction (first row of Vt)
+principal_dir = Vt[0]
+tls_slope = principal_dir[1] / principal_dir[0]
+
+# 4. Generate the line (must pass through the mean)
+x_line_range = np.array([np.min(x_coords), np.max(x_coords)])
+y_line_tls = tls_slope * (x_line_range - data_mean[0]) + data_mean[1]
+
+# Plotting
+plt.figure(figsize=(7, 6))
+plt.scatter(x_coords, y_coords, s=2, color='teal', alpha=0.5, label="Edge Points")
+# Using purple to contrast against the friend's green line
+plt.plot(x_line_range, y_line_tls, color='purple', linewidth=2.5, label="Total Least Squares (SVD)")
+plt.title("Total Least-Squares Fit (Orthogonal Distance)")
+plt.xlabel("X (pixels)")
+plt.ylabel("Y (pixels)")
+plt.legend()
+plt.gca().invert_yaxis()
+plt.show()
+
+# --- QUESTION 7: CALCULATE ANGLE ---
+tls_angle_deg = np.degrees(np.arctan(tls_slope))
+print(f"Calculated TLS Slope: {tls_slope:.4f}")
+print(f"TLS Angle: {tls_angle_deg:.2f} degrees")
